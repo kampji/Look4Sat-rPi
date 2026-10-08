@@ -4,6 +4,37 @@ A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is
 
 It is built for an 800×480 touchscreen in landscape. The layout also adapts to portrait and to any other resolution.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="docs/screen-passes.png" alt="Passes screen: next-pass card, day groups with sunrise and sunset, AOS/LOS countdown chips, colour-coded elevation"></td>
+    <td><img src="docs/screen-radar.png" alt="Radar screen: polar plot of an ISS pass with doppler-corrected transmitter frequencies"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Passes</b>: upcoming passes grouped by day, with countdowns and elevation colours</td>
+    <td align="center"><b>Radar</b>: live pass plot with doppler-corrected frequencies</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screen-map.png" alt="Map screen: ground track, footprint, day/night shading and live position data"></td>
+    <td><img src="docs/screen-satellites.png" alt="Satellites screen filtered to weather satellites"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Map</b>: ground track, footprint, day/night and auto-track</td>
+    <td align="center"><b>Satellites</b>: search and filter the whole catalog by type</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screen-settings.png" alt="Settings screen: station position, data updates and display options"></td>
+    <td><img src="docs/screen-portrait-passes.png" alt="Passes screen in portrait orientation" width="60%"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Settings</b>: station, data, display, radio and rotator</td>
+    <td align="center"><b>Portrait</b>: the same app on a 480×800 screen</td>
+  </tr>
+</table>
+
+<sub>Screenshots at 800×480 with test data.</sub>
+
 ## How it works
 
 ```
@@ -61,13 +92,35 @@ On first start the app downloads satellite data, which takes about a minute. Aft
 
 ## Screens
 
+The bottom/side navigation follows the current Look4Sat layout: **Satellites · Passes · ISS live · Map · Settings**. The Radar opens from a pass.
+
 | Screen | What it does |
 |---|---|
 | **Satellites** | Searches the whole catalog by name or NORAD ID. Filters by **Type** (CelesTrak groups such as Amateur, Weather, NOAA, Starlink), and selects all shown or none. Tap a row to select it; tap ⓘ to see orbital elements, element age and transmitters. The ✓✓ button goes to Passes. |
-| **Passes** | Lists upcoming and active passes with max elevation, altitude, AOS→LOS azimuths and a progress bar. Deep-space (GEO/HEO) satellites appear when they are visible. The top bar counts down to the next AOS (or the LOS of a pass in progress). The filter button sets hours ahead, minimum elevation and deep-space display. Tap a pass to open the Radar. |
-| **Radar** | Shows a polar plot of the pass, the live satellite position and an optional sweep animation. It also shows azimuth, elevation, altitude and distance, plus SatNOGS transmitters with **doppler-corrected** downlink and uplink frequencies. The target button streams the pass to a rotator and radio (see below). |
-| **Map** | Shows all selected satellites, plus the ground track (red) and footprint (yellow) of the focused one, with the day/night terminator and your station. Drag to pan, pinch or use +/− to zoom, double-tap to zoom in, tap a satellite to focus it, and use ‹ › to cycle. The crosshair button follows the focused satellite. |
-| **Settings** | Covers station position (lat/lon/alt, QTH locator, GPS), data sources and updates, file import, pass filter, display, map layers, rotator, radio and gpsd, plus system controls (full screen, reload, quit). |
+| **Passes** | Matches the current Look4Sat Passes screen: |
+| | • **Next-pass card** in the top bar, with an AOS/LOS countdown. Tap it to open the Radar. |
+| | • **Search** passes by name or NORAD ID. |
+| | • **Modes filter** (antenna button): only satellites with a transmitter in the chosen modes (FM, APT, CW…). |
+| | • **Filter**: minimum elevation, time ahead, DeepSpace, elevation highlight thresholds, and an **AOS time window** (can be inverted). |
+| | • Passes grouped by day under sticky headers showing **sunrise and sunset** at your station. |
+| | • Each card shows an **AOS/LOS countdown chip**, duration, AOS az → max elevation → LOS az, altitude, and AOS/LOS times with a progress bar. |
+| | • **Elevation color coding**: red below 15°, yellow in between, green from 45°. You can change both thresholds. |
+| | • **Pull down** (finger or mouse) to recalculate. |
+| **Radar** (tap a pass) | Shows a polar plot of the pass, the live position and an optional sweep, plus az/el/altitude/distance with color-coded elevation. Transmitters show **doppler-corrected** frequencies. The target button streams the pass to a rotator and radio. |
+| **ISS live** | Plays the ISS live video feed (NASA's official stream, Sen's 4K stream, NASA's current live video, or your own link). Below it: where the ISS is right now, its speed, whether it is in **daylight or Earth's shadow** (and for how long, since the feed looks dark at night), and the next time it passes over you. The video runs only while this page is open. |
+| **Map** | Shows all selected satellites, plus the ground track (red) and footprint (yellow) of the focused one, with day/night shading and your station. Tap a satellite to focus it, and use ‹ › to cycle. The tools are listed below. |
+| **Settings** | Covers station position (lat/lon/alt, QTH locator, GPS), data sources and updates, file import, passes and elevation colors, display (24/12-hour clock, UTC, night mode, scale, layout, rotation), map layers, rotator, radio and gpsd, plus system controls (full screen, reload, quit). |
+
+**Map tools** (top to bottom):
+
+| Button | What it does |
+|---|---|
+| + / − | Zoom. You can also pinch, use the mouse wheel, double-tap, or **double-tap-and-drag** up/down (one-finger zoom that works with a mouse or single-touch screen). |
+| ◎ Follow | Keeps the focused satellite centered (turning it on zooms in slightly so you can see it). Dragging the map turns it off. |
+| 📍 Home | Centers the map on your station. |
+| Ⓐ Auto-track | Follows the satellite currently passing over you, or the next one to rise, until its LOS, then hops to the next pass. It uses the same filters as the Passes list. The top bar shows `AUTO`. |
+
+**Mouse or touch:** every list scrolls with a finger, or with click-and-drag (with momentum) when using a mouse or a touchscreen that behaves like one.
 
 ## Screen size, orientation and scaling
 

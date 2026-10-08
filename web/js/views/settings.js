@@ -143,7 +143,10 @@ function passesSection() {
   return section('Passes', 'passes',
     row('Hours ahead', stepper(p.hoursAhead, { min: 1, max: 240, fmt: (v) => v + ' h', onchange: (v) => { save({ passes: { hoursAhead: v } }); debounce(recalc); } })),
     row('Min elevation', stepper(p.minElevation, { min: 0, max: 85, fmt: (v) => v + '°', onchange: (v) => { save({ passes: { minElevation: v } }); debounce(recalc); } })),
-    row('Deep-space satellites', toggle(p.showDeepSpace, (v) => { save({ passes: { showDeepSpace: v } }); recalc(); }), 'Show visible GEO/HEO satellites'));
+    row('Deep-space satellites', toggle(p.showDeepSpace, (v) => { save({ passes: { showDeepSpace: v } }); recalc(); }), 'Show visible GEO/HEO satellites'),
+    row(h('span', {}, 'Elevation colors: ', h('span', { class: 'el-low' }, 'low'), ' below'), stepper(S.state.display.elLow ?? 15, { min: 0, max: 60, fmt: (v) => v + '°', onchange: (v) => { save({ display: { elLow: v } }); emit('filter'); } })),
+    row(h('span', {}, 'Elevation colors: ', h('span', { class: 'el-high' }, 'high'), ' from'), stepper(S.state.display.elHigh ?? 45, { min: 10, max: 90, fmt: (v) => v + '°', onchange: (v) => { save({ display: { elHigh: v } }); emit('filter'); } }), 'In between shows in yellow'),
+    h('div', { class: 'hint' }, 'More pass filters (AOS time window, radio modes, search) are on the Passes screen.'));
 }
 let dt;
 const debounce = (fn) => { clearTimeout(dt); dt = setTimeout(fn, 700); };
@@ -152,7 +155,8 @@ function displaySection() {
   const d = S.state.display;
   const set = (k) => (v) => save({ display: { [k]: v } });
   return section('Display', 'layers',
-    row('UTC time', toggle(d.utc, (v) => { save({ display: { utc: v } }); })),
+    row('Clock', segmented([[true, '24-hour'], [false, '12-hour']], d.clock24 !== false, (v) => { save({ display: { clock24: v } }); emit('filter'); })),
+    row('UTC time', toggle(d.utc, (v) => { save({ display: { utc: v } }); requestPasses(true); })),
     row('Night mode', toggle(d.night, set('night')), 'Red palette that preserves night vision'),
     row('UI scale', stepper(Math.round(d.scale * 100), { min: 60, max: 200, step: 10, fmt: (v) => v + '%', onchange: (v) => save({ display: { scale: v / 100 } }) })),
     row('Layout', segmented([['auto', 'Auto'], ['landscape', 'Landscape'], ['portrait', 'Portrait']], d.layout, set('layout'))),

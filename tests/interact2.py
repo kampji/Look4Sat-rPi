@@ -1,0 +1,61 @@
+import sys
+from playwright.sync_api import sync_playwright
+url, out = sys.argv[1], sys.argv[2]
+errs=[]
+with sync_playwright() as p:
+    b = p.chromium.launch()
+    pg = b.new_page(viewport={"width":800,"height":480})
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("console", lambda m: m.type=="error" and errs.append(m.text))
+    pg.goto(url); pg.wait_for_timeout(1500)
+    # mouse drag-scroll on satellites list
+    pg.click(".nav-item[data-id=satellites]"); pg.wait_for_timeout(300)
+    t0 = pg.evaluate("document.querySelector('.vlist').scrollTop")
+    pg.mouse.move(400, 400); pg.mouse.down()
+    for y in range(400, 150, -25): pg.mouse.move(400, y); pg.wait_for_timeout(10)
+    pg.mouse.up(); pg.wait_for_timeout(600)
+    t1 = pg.evaluate("document.querySelector('.vlist').scrollTop")
+    sel = pg.evaluate("document.querySelector('.type-sub').textContent")
+    print("sat list drag scroll:", t0, "->", t1, "| selection unchanged:", sel)
+    # passes: drag scroll + filter + modes + 12h
+    pg.click(".nav-item[data-id=passes]"); pg.wait_for_timeout(300)
+    pg.mouse.move(300, 420); pg.mouse.down()
+    for y in range(420, 200, -20): pg.mouse.move(300, y); pg.wait_for_timeout(10)
+    pg.mouse.up(); pg.wait_for_timeout(500)
+    print("passes scrollTop:", pg.evaluate("document.querySelector('.passes-grid').scrollTop"), "view still passes:", pg.evaluate("document.querySelector('.view-passes').classList.contains('active')"))
+    pg.click(".passes-bar .btn-icon[aria-label=Filter]"); pg.wait_for_timeout(300); pg.screenshot(path=f"{out}/filter.png")
+    pg.click(".dialog-actions .btn:text-is('Cancel')")
+    pg.click(".passes-bar .btn-icon[aria-label=Modes]"); pg.wait_for_timeout(300); pg.screenshot(path=f"{out}/modes.png")
+    pg.click(".chk-item:has-text('APT')"); pg.click(".dialog-actions .btn:text-is('Apply')"); pg.wait_for_timeout(800)
+    print("after APT filter:", sorted(set(pg.eval_on_selector_all(".pass .name", "els => els.map(e => e.textContent)"))))
+    pg.click(".passes-bar .btn-icon[aria-label=Modes]"); pg.click(".dialog-actions .btn:text-is('Clear')"); pg.wait_for_timeout(800)
+    pg.fill(".passes-bar .search input", "noaa"); pg.wait_for_timeout(300)
+    print("search noaa:", sorted(set(pg.eval_on_selector_all(".pass .name", "els => els.map(e => e.textContent)"))))
+    pg.fill(".passes-bar .search input", ""); pg.dispatch_event(".passes-bar .search input", "input")
+    pg.click(".osk-key.k-enter"); pg.wait_for_timeout(200)
+    # 12h clock
+    pg.click(".nav-item[data-id=settings]"); pg.wait_for_timeout(300)
+    pg.click(".srow:has-text('Clock') button:text-is('12-hour')"); pg.wait_for_timeout(300)
+    pg.click(".nav-item[data-id=passes]"); pg.wait_for_timeout(500); pg.screenshot(path=f"{out}/passes12h.png")
+    # radar from passes: nav highlight
+    pg.click(".pass >> nth=2"); pg.wait_for_timeout(700)
+    print("radar active nav:", pg.evaluate("document.querySelector('.nav-item.active').dataset.id"))
+    pg.screenshot(path=f"{out}/radar12h.png")
+    # map: auto-track, home, follow, double-tap-drag zoom with mouse
+    pg.click(".nav-item[data-id=map]"); pg.wait_for_timeout(600)
+    pg.click(".map-tools .btn-icon[aria-label='Auto-track the next pass']"); pg.wait_for_timeout(600)
+    v = pg.evaluate("__l4sMapView()"); print("auto:", v["auto"], "sel", v["selId"], "toast:", pg.evaluate("document.querySelector('#toast').textContent"))
+    pg.screenshot(path=f"{out}/auto.png")
+    pg.click(".map-tools .btn-icon[aria-label='Center on my station']"); pg.wait_for_timeout(400)
+    v = pg.evaluate("__l4sMapView()"); print("home:", round(v["lon"],2), round(v["lat"],2), "auto", v["auto"], "follow", v["follow"])
+    k0 = v["k"]
+    pg.mouse.click(450, 250); pg.wait_for_timeout(100)
+    pg.mouse.move(450, 250); pg.mouse.down()
+    for y in range(250, 330, 10): pg.mouse.move(450, y); pg.wait_for_timeout(10)
+    pg.mouse.up(); pg.wait_for_timeout(200)
+    print("double-tap-drag zoom k:", round(k0,2), "->", round(pg.evaluate("__l4sMapView()")["k"],2))
+    pg.click(".map-tools .btn-icon[aria-label='Follow the satellite']"); pg.wait_for_timeout(300)
+    print("follow toast:", pg.evaluate("document.querySelector('#toast').textContent"))
+    pg.click(".nav-item[data-id=settings]"); pg.click(".srow:has-text('Clock') button:text-is('24-hour')")
+    b.close()
+print(errs or "no errors")

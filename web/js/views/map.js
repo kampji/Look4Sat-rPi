@@ -1,9 +1,9 @@
 import { S, on, emit, nextPass, selectedEntries } from '../store.js';
-import { h, iconBtn, fmtDeg, fmtKm } from '../ui.js';
+import { h, iconBtn, toast, fmtDeg, fmtKm, elClass } from '../ui.js';
 import { timerBox } from './common.js';
 import { makeSatrec, observer, look, groundTrack, footprint, subSolar, toQth, periodMin, isDeepSpace, RAD, DEG } from '../orbit.js';
 
-let canvas, ctx, baseCanvas, wrap, timer, info = {}, followBtn;
+let canvas, ctx, baseCanvas, wrap, timer, info = {}, followBtn, homeBtn, autoBtn;
 let W = 0, H = 0, dpr = 1;
 let view = { lon: 0, lat: 0, k: 0 };        // center + pixels per degree
 let world = null, baseDirty = true;
@@ -11,6 +11,7 @@ let recs = new Map();                        // id -> satrec for all sats on the
 let positions = [];                          // [{id, name, lat, lon, alt}]
 let selId = null, selTrack = [], trackAt = 0, cur = null;
 let follow = true, visible = false, rafPending = false;
+let auto = false, autoPass = null;            // auto-track: follow the current/next pass until LOS
 let C = {};
 
 // ----------------------------------------------------------------- data
@@ -45,13 +46,55 @@ function cycle(d) {
   select(list[(i + d + list.length) % list.length]);
 }
 
-function select(id) {
+function ensureRec(id) {
+  if (!recs || recs.has(id)) return;
+  const e = S.byId.get(id);
+  const r = e && makeSatrec(e);
+  if (r) recs.set(id, r);
+}
+
+function select(id, fromAuto = false) {
+  if (!fromAuto && auto) setAuto(false, true);
+  ensureRec(id);
   selId = id;
   S.mapSatId = id;
   trackAt = 0;
   follow = true;
   followBtn.classList.add('primary');
-  update(Date.now());
+  if (!fromAuto) update(Date.now());
+}
+
+// ----------------------------------------------------------------- auto-track
+/** The pass to watch: one in progress (earliest to rise), else the next to rise. */
+function pickAutoPass(now) {
+  let best = null;
+  for (const p of S.passes) {
+    if (p.deep || p.los <= now) continue;
+    if (!best || p.aos < best.aos) best = p;
+  }
+  return best;
+}
+function runAuto(now) {
+  if (!auto) return;
+  if (!autoPass || autoPass.los <= now || !S.passes.includes(autoPass)) {
+    const prev = autoPass;
+    autoPass = pickAutoPass(now);
+    if (autoPass && (!prev || autoPass.id !== prev.id || autoPass.aos !== prev.aos)) {
+      if (prev) toast(`Auto-track: next up ${autoPass.name}`);
+      select(autoPass.id, true);
+      if (view.k < minK() * 1.5) view.k = minK() * 2;
+    }
+  }
+}
+function setAuto(v, quiet) {
+  auto = v; autoPass = null;
+  autoBtn.classList.toggle('primary', v);
+  if (v) {
+    setFollow(true);
+    runAuto(Date.now());
+    if (!quiet) toast(autoPass ? `Auto-track on: ${autoPass.name} until LOS, then the next pass` : 'Auto-track on: waiting for the next pass');
+  } else if (!quiet) toast('Auto-track off');
+  if (visible) update(Date.now());
 }
 
 // ----------------------------------------------------------------- projection
@@ -224,6 +267,7 @@ function resize() {
 
 // ----------------------------------------------------------------- live update
 function update(now) {
+  runAuto(now);
   const obs = observer(S.state.station);
   positions = [];
   for (const [id, rec] of recs) {
@@ -248,10 +292,13 @@ function update(now) {
   }
   // header + info panel
   const e = selId && S.byId.get(selId);
-  timer.update(selId ? nextPass(now, selId) : null, now, e ? `${e.id} - ${e.name}` : 'No satellite selected');
+  const label = e ? `${e.id} - ${e.name}` : 'No satellite selected';
+  if (auto) timer.update(autoPass || null, now, autoPass ? `AUTO · ${label}` : 'AUTO · waiting for the next pass');
+  else timer.update(selId ? nextPass(now, selId) : null, now, label);
   const set = (k, v) => { info[k].textContent = v; };
   set('Azimuth', cur ? fmtDeg(cur.az) : '--');
   set('Elevation', cur ? fmtDeg(cur.el) : '--');
+  info.Elevation.className = 'iv ' + (cur && cur.el >= 0 ? elClass(cur.el) : '');
   set('Altitude', cur ? fmtKm(cur.alt) : '--');
   set('Distance', cur ? fmtKm(cur.range) : '--');
   set('Latitude', cur ? fmtDeg(cur.lat, 2) : '--');
@@ -268,7 +315,13 @@ function setupGestures() {
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
     pts.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
-    if (pts.size === 1) start = { x: e.offsetX, y: e.offsetY, t: performance.now(), moved: false, lon: view.lon, lat: view.lat };
+    if (pts.size === 1) {
+      const t = performance.now();
+      start = { x: e.offsetX, y: e.offsetY, t, moved: false, lon: view.lon, lat: view.lat };
+      // second tap held down: drag up/down to zoom (one-finger zoom — works with a mouse
+      // or a single-touch screen too)
+      if (t - lastTap < 300) start.zoom = { k: view.k, lon: view.lon, lat: view.lat };
+    }
     if (pts.size === 2) {
       const [a, b] = [...pts.values()];
       pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), k: view.k };
@@ -281,7 +334,10 @@ function setupGestures() {
     if (pts.size === 1 && start) {
       const dx = e.offsetX - start.x, dy = e.offsetY - start.y;
       if (Math.hypot(dx, dy) > 8) start.moved = true;
-      if (start.moved) {
+      if (start.moved && start.zoom) {
+        Object.assign(view, start.zoom); // zoom relative to where the gesture started
+        zoomAt(start.x, start.y, Math.exp(dy / 110));
+      } else if (start.moved) {
         setFollow(false);
         view.lon = start.lon - dx / view.k;
         view.lat = start.lat + dy / view.k;
@@ -299,9 +355,10 @@ function setupGestures() {
     if (pts.size === 1) { const [p] = [...pts.values()]; start = { x: p.x, y: p.y, t: 0, moved: true, lon: view.lon, lat: view.lat }; return; }
     if (start && !start.moved && performance.now() - start.t < 400) {
       const now = performance.now();
-      if (now - lastTap < 300) { zoomAt(e.offsetX, e.offsetY, 2); lastTap = 0; }
+      if (start.zoom) { zoomAt(e.offsetX, e.offsetY, 2); lastTap = 0; }
       else { lastTap = now; hitTest(e.offsetX, e.offsetY); }
     }
+    if (start && start.zoom) lastTap = 0;
     start = null;
   };
   canvas.addEventListener('pointerup', end);
@@ -330,7 +387,28 @@ function hitTest(x, y) {
   if (best) select(best.id);
 }
 
-function setFollow(v) { follow = v; followBtn.classList.toggle('primary', v); }
+window.__l4sMapView = () => ({ ...view, follow, auto: typeof auto === "undefined" ? null : auto, selId });
+function setFollow(v) {
+  follow = v;
+  followBtn.classList.toggle('primary', v);
+  if (!v && auto) { auto = false; autoPass = null; autoBtn.classList.remove('primary'); }
+}
+function toggleFollow() {
+  if (follow) { setFollow(false); toast('Free map: drag and zoom anywhere'); return; }
+  setFollow(true);
+  if (view.k < minK() * 1.5) view.k = minK() * 2; // zoom in a little so centring is visible
+  const e = selId && S.byId.get(selId);
+  toast(e ? `Following ${e.name} (drag the map to stop)` : 'Following the satellite');
+  update(Date.now());
+}
+function centerHome() {
+  setFollow(false);
+  const st = S.state.station;
+  view.k = Math.max(view.k, minK() * 2.5);
+  view.lon = st.lon; view.lat = st.lat;
+  clampView(); baseDirty = true; requestDraw();
+  toast(S.state.station.set ? 'Centered on your station' : 'Set your station position in Settings first');
+}
 
 export default {
   id: 'map', label: 'Map', icon: 'map',
@@ -339,7 +417,9 @@ export default {
     canvas = h('canvas', { class: 'map-canvas' });
     ctx = canvas.getContext('2d');
     baseCanvas = document.createElement('canvas');
-    followBtn = iconBtn('crosshair', () => { setFollow(!follow); update(Date.now()); }, { label: 'Follow satellite', class: 'primary' });
+    followBtn = iconBtn('follow', toggleFollow, { label: 'Follow the satellite', class: 'primary' });
+    homeBtn = iconBtn('home', centerHome, { label: 'Center on my station' });
+    autoBtn = iconBtn('auto', () => setAuto(!auto), { label: 'Auto-track the next pass' });
     const cell = (k) => { info[k] = h('span', { class: 'iv' }, '--'); return h('div', { class: 'icell' }, h('span', { class: 'il' }, k), info[k]); };
     root.append(
       h('div', { class: 'topbar' }, iconBtn('left', () => cycle(-1), { label: 'Previous satellite' }), timer.el, iconBtn('right', () => cycle(1), { label: 'Next satellite' })),
@@ -347,7 +427,7 @@ export default {
         h('div', { class: 'map-tools' },
           iconBtn('plus', () => zoomAt(W / 2, H / 2, 1.6), { label: 'Zoom in' }),
           iconBtn('minus', () => zoomAt(W / 2, H / 2, 1 / 1.6), { label: 'Zoom out' }),
-          followBtn),
+          followBtn, homeBtn, autoBtn),
         h('div', { class: 'map-info' }, ['Azimuth', 'Elevation', 'Altitude', 'Distance', 'Latitude', 'Longitude', 'QTH', 'Velocity'].map(cell))),
     );
     setupGestures();

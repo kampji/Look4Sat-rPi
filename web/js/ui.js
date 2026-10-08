@@ -70,6 +70,13 @@ const P = {
   edit: '<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>',
   power: '<path d="M12 3v9"/><path d="M6.3 7a8 8 0 1 0 11.4 0"/>',
   fullscreen: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+  iss: '<rect x="10" y="9" width="4" height="6" rx="1"/><path d="M2 6h5v12H2zM17 6h5v12h-5zM7 12h3M14 12h3M12 9V5M10 5h4"/>',
+  home: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/>',
+  auto: '<circle cx="12" cy="12" r="9.5"/><path d="M8.3 16.5 12 7l3.7 9.5M9.6 13.3h4.8"/>',
+  follow: '<circle cx="12" cy="12" r="7.5"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/>',
+  video: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/>',
   layers: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>',
 };
 export function icon(name, cls = '') {
@@ -96,10 +103,31 @@ const parts = (ms) => {
     ? { y: d.getUTCFullYear(), mo: d.getUTCMonth(), d: d.getUTCDate(), w: d.getUTCDay(), h: d.getUTCHours(), m: d.getUTCMinutes(), s: d.getUTCSeconds() }
     : { y: d.getFullYear(), mo: d.getMonth(), d: d.getDate(), w: d.getDay(), h: d.getHours(), m: d.getMinutes(), s: d.getSeconds() };
 };
-export const fmtTime = (ms) => { const p = parts(ms); return `${p2(p.h)}:${p2(p.m)}:${p2(p.s)}`; };
-export const fmtHM = (ms) => { const p = parts(ms); return `${p2(p.h)}:${p2(p.m)}`; };
+const is12 = () => S.state?.display?.clock24 === false;
+const hh = (p) => (is12() ? String(((p.h + 11) % 12) + 1) : p2(p.h));
+const ap = (p) => (is12() ? (p.h < 12 ? ' AM' : ' PM') : '');
+export const fmtTime = (ms) => { const p = parts(ms); return `${hh(p)}:${p2(p.m)}:${p2(p.s)}${ap(p)}`; };
+export const fmtHM = (ms) => { const p = parts(ms); return `${hh(p)}:${p2(p.m)}${ap(p)}`; };
+/** Clock time for a minute-of-day (AOS window labels). */
+export const fmtMinute = (min) => { const p = { h: Math.floor(min / 60) % 24, m: min % 60 }; return `${hh(p)}:${p2(p.m)}${ap(p)}`; };
 export const fmtDate = (ms) => { const p = parts(ms); return `${DAYS[p.w]} ${p2(p.d)} ${MONTHS[p.mo]}`; };
-export const fmtDateTime = (ms) => { const p = parts(ms); return `${p.y}-${p2(p.mo + 1)}-${p2(p.d)} ${p2(p.h)}:${p2(p.m)}`; };
+export const fmtDateTime = (ms) => { const p = parts(ms); return `${p.y}-${p2(p.mo + 1)}-${p2(p.d)} ${fmtHM(ms)}`; };
+export const fmtDayLong = (ms) => { const p = parts(ms); return `${DAYS[p.w]}, ${p2(p.d)} ${MONTHS[p.mo]} ${p.y}`; };
+/** Start of the (local or UTC) calendar day containing ms. */
+export function dayStart(ms) {
+  const d = new Date(ms);
+  return S.state?.display?.utc ? Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+export const fmtDuration = (ms) => { const s = Math.round(ms / 1000); return `${Math.floor(s / 60)}m ${s % 60}s`; };
+
+/** Look4Sat elevation colouring: red below the low threshold, accent in between, green above high. */
+export function elClass(el) {
+  const d = S.state?.display || {};
+  if (!Number.isFinite(el)) return '';
+  if (el < (d.elLow ?? 15)) return 'el-low';
+  if (el < (d.elHigh ?? 45)) return 'el-mid';
+  return 'el-high';
+}
 export function fmtCountdown(ms) {
   if (ms < 0) ms = 0;
   const t = Math.floor(ms / 1000);
@@ -294,4 +322,67 @@ export const osk = (() => {
   // a real keyboard was used: stop popping the on-screen one up
   document.addEventListener('keydown', (e) => { if (e.isTrusted && e.key.length === 1 && target) { physical = true; hide(); } });
   return { show, hide };
+})();
+
+// ------------------------------------------------------------------ drag-to-scroll
+// Makes mouse (and mouse-emulating touchscreens) scroll lists like a finger: click-and-drag with
+// momentum. Real touch input keeps the browser's native scrolling.
+/** Convert a screen-space delta into the app's own (possibly rotated) coordinates. */
+export function toLocal(dx, dy) {
+  switch (Number(S.state?.display?.rotate) || 0) {
+    case 90: return [dy, -dx];
+    case 180: return [-dx, -dy];
+    case 270: return [-dy, dx];
+    default: return [dx, dy];
+  }
+}
+export const dragScroll = (() => {
+  let st = null, anim = 0, suppressUntil = 0;
+  const hooks = new Set(); // pull-to-refresh listeners: fn(scroller, pullPx, released)
+  document.addEventListener('pointerdown', (e) => {
+    cancelAnimationFrame(anim);
+    if (e.pointerType === 'touch' || e.button !== 0) return;
+    if (e.target.closest('input, canvas, .switch, .stepper, .segmented, .osk, iframe, .no-drag')) return;
+    const sc = e.target.closest('.scroll, .dialog-body');
+    if (!sc) return;
+    st = { sc, x: e.clientX, y: e.clientY, top: sc.scrollTop, moved: false, samples: [], pull: 0 };
+  }, true);
+  document.addEventListener('pointermove', (e) => {
+    if (!st) return;
+    const [, dy] = toLocal(e.clientX - st.x, e.clientY - st.y);
+    if (!st.moved && Math.abs(dy) < 7) return;
+    if (!st.moved) { st.moved = true; st.sc.classList.add('dragging'); }
+    const want = st.top - dy;
+    st.sc.scrollTop = want;
+    st.pull = want < 0 ? -want : 0;
+    if (st.pull) hooks.forEach((fn) => fn(st.sc, st.pull, false));
+    const now = performance.now();
+    st.samples.push([now, st.sc.scrollTop]);
+    while (st.samples.length && now - st.samples[0][0] > 100) st.samples.shift();
+  }, true);
+  const end = () => {
+    if (!st) return;
+    const s = st; st = null;
+    s.sc.classList.remove('dragging');
+    if (!s.moved) return;
+    suppressUntil = performance.now() + 80; // swallow the click that ends a drag
+    hooks.forEach((fn) => fn(s.sc, s.pull, true));
+    if (s.samples.length < 2) return;
+    const [t0, y0] = s.samples[0], [t1, y1] = s.samples[s.samples.length - 1];
+    let v = (y1 - y0) / Math.max(16, t1 - t0); // px per ms
+    let last = performance.now();
+    const step = (now) => {
+      const dt = now - last; last = now;
+      s.sc.scrollTop += v * dt;
+      v *= Math.pow(0.995, dt);
+      if (Math.abs(v) > 0.02) anim = requestAnimationFrame(step);
+    };
+    anim = requestAnimationFrame(step);
+  };
+  document.addEventListener('pointerup', end, true);
+  document.addEventListener('pointercancel', end, true);
+  document.addEventListener('click', (e) => {
+    if (performance.now() < suppressUntil) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  return { onPull: (fn) => hooks.add(fn) };
 })();
