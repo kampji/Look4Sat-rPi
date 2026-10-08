@@ -1,0 +1,5 @@
+# Keep Unix line endings everywhere: the shell scripts must run on the Raspberry Pi,
+# even when the repo is checked out on Windows.
+* text=auto eol=lf
+*.png binary
+*.ttf binary
