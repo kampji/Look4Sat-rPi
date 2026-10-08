@@ -62,7 +62,8 @@ open_browser() {  # $1 = kiosk|window ; blocks until the window is closed
   local common=(--user-data-dir="$PROFILE" --noerrdialogs --disable-infobars --no-first-run
     --no-default-browser-check --disable-session-crashed-bubble --disable-translate
     --disable-features=Translate,TouchpadOverscrollHistoryNavigation --overscroll-history-navigation=0
-    --disable-pinch --password-store=basic --check-for-update-interval=31536000 --ozone-platform-hint=auto)
+    --disable-pinch --password-store=basic --check-for-update-interval=31536000 --ozone-platform-hint=auto
+    --touch-events=enabled --autoplay-policy=no-user-gesture-required)
   if [ "$mode" = kiosk ]; then
     "$browser" "${common[@]}" --kiosk "$URL" >>"$LOG_DIR/browser.log" 2>&1
   else

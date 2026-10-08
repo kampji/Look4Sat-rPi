@@ -15,7 +15,7 @@ with sync_playwright() as p:
         pg.on("pageerror", lambda e: errors.append(f"{size} pageerror: {e}"))
         pg.goto(url)
         pg.wait_for_timeout(2500)
-        for view in ["passes", "satellites", "radar", "map", "settings"]:
+        for view in ["passes", "satellites", "iss", "map", "settings"]:
             pg.click(f".nav-item[data-id={view}]")
             pg.wait_for_timeout(1500)
             pg.screenshot(path=f"{out}/{size}-{view}.png")

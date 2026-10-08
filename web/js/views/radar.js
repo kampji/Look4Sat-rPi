@@ -1,5 +1,5 @@
 import { S, on, emit, api, nextPass } from '../store.js';
-import { h, icon, iconBtn, onTap, toast, fmtDeg, fmtKm, fmtMHz, fmtTime } from '../ui.js';
+import { h, icon, iconBtn, onTap, toast, fmtDeg, fmtKm, fmtMHz, elClass } from '../ui.js';
 import { timerBox, passCard } from './common.js';
 import { makeSatrec, observer, look, C_KMS } from '../orbit.js';
 
@@ -215,7 +215,7 @@ function toggleTracking() {
 }
 
 export default {
-  id: 'radar', label: 'Radar', icon: 'radar',
+  id: 'radar', label: 'Radar', icon: 'radar', parent: 'passes',
   mount(root) {
     el = root;
     timer = timerBox();
@@ -266,6 +266,7 @@ export default {
     cur = rec ? look(rec, obs, now) : null;
     readout.Azimuth.textContent = cur ? fmtDeg(cur.az) : '--';
     readout.Elevation.textContent = cur ? fmtDeg(cur.el) : '--';
+    readout.Elevation.className = 'rv ' + (cur && cur.el >= 0 ? elClass(cur.el) : '');
     readout.Altitude.textContent = cur ? fmtKm(cur.alt) : '--';
     readout.Distance.textContent = cur ? fmtKm(cur.range) : '--';
     updateTx();

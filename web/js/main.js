@@ -4,9 +4,11 @@ import satellitesView from './views/satellites.js';
 import passesView from './views/passes.js';
 import radarView from './views/radar.js';
 import mapView from './views/map.js';
+import issView from './views/iss.js';
 import settingsView from './views/settings.js';
 
-const VIEWS = [satellitesView, passesView, radarView, mapView, settingsView];
+// Radar is a sub-page of Passes (as in current Look4Sat); its nav slot is the ISS live page.
+const VIEWS = [satellitesView, passesView, issView, mapView, settingsView, radarView];
 const app = document.getElementById('app');
 let current = null;
 
@@ -47,14 +49,15 @@ export function go(id, arg) {
   if (current && current !== v) { current.el.classList.remove('active'); current.hide?.(); }
   current = v;
   v.el.classList.add('active');
-  [...nav.children].forEach((b) => b.classList.toggle('active', b.dataset.id === id));
+  const navId = v.parent || id;
+  [...nav.children].forEach((b) => b.classList.toggle('active', b.dataset.id === navId));
   v.show?.(arg);
   try { localStorage.setItem('l4s.view', id); } catch { /* storage unavailable */ }
 }
 on('go', ({ id, arg }) => go(id, arg));
 
 function buildNav() {
-  for (const v of VIEWS) {
+  for (const v of VIEWS.filter((x) => !x.parent)) {
     const b = h('button', { class: 'nav-item', 'data-id': v.id }, h('span', { class: 'nav-pill' }, icon(v.icon)), h('span', { class: 'nav-label' }, v.label));
     onTap(b, () => go(v.id));
     nav.append(b);

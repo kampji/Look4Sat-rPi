@@ -100,13 +100,19 @@ export function requestPasses(force = false) {
   const st = S.state;
   S.passesBusy = true;
   emit('passes-busy');
+  const p = st.passes;
+  let entries = selectedEntries();
+  // "modes" filter (Look4Sat's radios dialog): only satellites with a transmitter in one of the modes
+  const modes = new Set(p.modes || []);
+  if (modes.size) entries = entries.filter((e) => (S.radios[e.id] || []).some((r) => modes.has(r.m) || modes.has(r.um)));
   worker.postMessage({
     reqId: ++reqId,
-    entries: selectedEntries(),
+    entries,
     station: st.station,
-    hoursAhead: st.passes.hoursAhead,
-    minEl: st.passes.minElevation,
-    showDeep: st.passes.showDeepSpace,
+    hoursAhead: p.hoursAhead,
+    minEl: p.minElevation,
+    showDeep: p.showDeepSpace,
+    window: { aosStart: p.aosStart ?? 0, aosEnd: p.aosEnd ?? 1439, invertAos: !!p.invertAos, utc: !!st.display.utc },
     now: Date.now(),
   });
 }

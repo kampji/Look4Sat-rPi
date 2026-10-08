@@ -86,11 +86,13 @@ DEFAULT_SELECTION = [
 DEFAULT_STATE = {
     "version": 1,
     "station": {"lat": 0.0, "lon": 0.0, "alt": 0.0, "set": False},
-    "passes": {"hoursAhead": 24, "minElevation": 10, "showDeepSpace": True},
+    "passes": {"hoursAhead": 24, "minElevation": 10, "showDeepSpace": True,
+               "aosStart": 0, "aosEnd": 1439, "invertAos": False, "modes": []},
     "display": {
         "utc": False, "scale": 1.0, "rotate": 0, "layout": "auto", "sweep": True,
         "osk": True, "night": False, "mapLabels": True, "mapTrack": True,
         "mapFootprint": True, "mapNight": True, "mapAll": True, "hideCursor": False,
+        "clock24": True, "elLow": 15, "elHigh": 45,
     },
     "data": {
         "satSources": DEFAULT_SAT_SOURCES,
@@ -101,6 +103,7 @@ DEFAULT_STATE = {
     "gps": {"enabled": False, "follow": False, "host": "127.0.0.1", "port": 2947},
     "rotator": {"enabled": False, "host": "127.0.0.1", "port": 4533, "minEl": 0},
     "rig": {"enabled": False, "host": "127.0.0.1", "port": 4532, "offsetHz": 0},
+    "iss": {"source": 0, "custom": []},
     "selection": DEFAULT_SELECTION,
 }
 
