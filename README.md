@@ -1,8 +1,14 @@
 # Look4Sat rPi
 
-A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop, with the same dark look and five screens: **Satellites, Passes, Radar, Map and Settings**.
+A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop, with the same dark look, four core screens, **Satellites, Passes, Map, Settings**, and a new section, **ISS Live**.
 
-It is built for an 800×480 touchscreen in landscape. The layout also adapts to portrait and to any other resolution.
+It's designed for an 800×480 touchscreen in landscape, although the layout adapts to portrait and any other resolution.
+
+<p align="center">
+  <img src="docs/rpi_irl.jpg" width=60%><br>
+  <i>Look4Sat-rPi on a Raspberry Pi 7in touch display powered by a Raspberry Pi 5,<br>running Raspberry Pi OS (supported by a 3D printed tablet stand).</i>
+</p>
+
 
 ## Screenshots
 
@@ -60,9 +66,9 @@ It is built for an 800×480 touchscreen in landscape. The layout also adapts to 
 You need Raspberry Pi OS **with desktop** (Bookworm or Trixie). A Pi 4 or 5 is recommended; a Pi 3B+ works but is slower.
 
 ```bash
-# copy this folder to the Pi, e.g. ~/Look4Sat_rPi, then:
-cd ~/Look4Sat_rPi
-./scripts/install.sh
+git clone https://github.com/kampji/Look4Sat-rPi/
+cd Look4Sat-rpi
+bash scripts/install.sh
 ```
 
 The installer installs Chromium if it's missing and adds three menu entries and a `look4sat` command. **Nothing starts at boot, and nothing runs in the background**: the server runs only while the app is open.
@@ -190,3 +196,7 @@ Pass search uses an adaptive coarse scan, bisection to 1 s for AOS and LOS, and 
 * [Natural Earth](https://www.naturalearthdata.com/): public-domain map data.
 * [Roboto](https://fonts.google.com/specimen/Roboto) (OFL).
 * Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org).
+
+## Tested Hardware
+* [Raspberry Pi 7in Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)
+* [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
