@@ -66,7 +66,7 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
 You need Raspberry Pi OS **with desktop** (Bookworm or Trixie). A Pi 4 or 5 is recommended; a Pi 3B+ works but is slower.
 
 ```bash
-git clone https://github.com/kampji/Look4Sat-rPi/
+git clone https://github.com/kampji/look4sat-rpi.git
 cd Look4Sat-rpi
 bash scripts/install.sh
 ```
