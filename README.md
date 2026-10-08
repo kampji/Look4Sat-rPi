@@ -6,7 +6,7 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
 
 <p align="center">
   <img src="docs/rpi_irl.jpg" width=60%><br>
-  <i>Look4Sat-rPi on a Raspberry Pi 7in touch display powered by a Raspberry Pi 5,<br>running Raspberry Pi OS (supported by a 3D printed tablet stand).</i>
+  <sub><i>Look4Sat-rPi on a Raspberry Pi 7in touch display powered by a Raspberry Pi 5, running Raspberry Pi OS (supported by a 3D printed tablet stand).</i></sub>
 </p>
 
 
