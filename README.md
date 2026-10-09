@@ -5,7 +5,7 @@ A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is
 It's designed for an 800×480 touchscreen in landscape, although the layout adapts to portrait and any other resolution.
 
 <p align="center">
-  <img src="docs/rpi_irl.jpg" width=60%><br>
+  <img src="docs/rpi_irl.jpg" width=70%><br>
   <sub><i>Look4Sat-rPi on a Raspberry Pi 7in touch display powered by a Raspberry Pi 5, running Raspberry Pi OS (supported by a 3D printed tablet stand).</i></sub>
 </p>
 
@@ -66,8 +66,8 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
 You need Raspberry Pi OS **with desktop** (Bookworm or Trixie). A Pi 4 or 5 is recommended; a Pi 3B+ works but is slower.
 
 ```bash
-git clone https://github.com/kampji/look4sat-rpi.git
-cd Look4Sat-rpi
+git clone https://github.com/kampji/look4sat-rpi.git ~/Look4Sat-rPi
+cd ~/Look4Sat-rPi
 bash scripts/install.sh
 ```
 
