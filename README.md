@@ -1,12 +1,12 @@
 # Look4Sat rPi
 
-A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop, with the same dark look, four core screens, **Satellites, Passes, Map, Settings**, and a new section, **ISS Live**.
+A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop. Features the same dark look and four core screens, **Satellites, Passes, Map, Settings**, plus a just-for-fun add-on, **ISS Live**.
 
 It's designed for an 800×480 touchscreen in landscape, although the layout adapts to portrait and any other resolution.
 
 <p align="center">
   <img src="docs/rpi_irl.jpg" width=70%><br>
-  <sub><i>Look4Sat-rPi on a Raspberry Pi 7in touch display powered by a Raspberry Pi 5, running Raspberry Pi OS (supported by a 3D printed tablet stand).</i></sub>
+  <sub><i>Look4Sat-rPi on a Raspberry Pi 7-inch touch display powered by a Raspberry Pi 5, running Raspberry Pi OS (supported by a 3D printed tablet stand).</i></sub>
 </p>
 
 
@@ -113,7 +113,7 @@ The bottom/side navigation follows the current Look4Sat layout: **Satellites · 
 | | • **Elevation color coding**: red below 15°, yellow in between, green from 45°. You can change both thresholds. |
 | | • **Pull down** (finger or mouse) to recalculate. |
 | **Radar** (tap a pass) | Shows a polar plot of the pass, the live position and an optional sweep, plus az/el/altitude/distance with color-coded elevation. Transmitters show **doppler-corrected** frequencies. The target button streams the pass to a rotator and radio. |
-| **ISS live** | Plays the ISS live video feed (NASA's official stream, Sen's 4K stream, NASA's current live video, or your own link). Below it: where the ISS is right now, its speed, whether it is in **daylight or Earth's shadow** (and for how long, since the feed looks dark at night), and the next time it passes over you. The video runs only while this page is open. |
+| **ISS Live** | Plays the ISS live video feed (NASA's official stream, Sen's 4K stream, NASA's current live video, or your own link). Below it: where the ISS is right now, its speed, whether it is in **daylight or Earth's shadow** (and for how long, since the feed looks dark at night), and the next time it passes over you. The video runs only while this page is open. |
 | **Map** | Shows all selected satellites, plus the ground track (red) and footprint (yellow) of the focused one, with day/night shading and your station. Tap a satellite to focus it, and use ‹ › to cycle. The tools are listed below. |
 | **Settings** | Covers station position (lat/lon/alt, QTH locator, GPS), data sources and updates, file import, passes and elevation colors, display (24/12-hour clock, UTC, night mode, scale, layout, rotation), map layers, rotator, radio and gpsd, plus system controls (full screen, reload, quit). |
 
@@ -198,5 +198,5 @@ Pass search uses an adaptive coarse scan, bisection to 1 s for AOS and LOS, and 
 * Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org).
 
 ## Tested Hardware
-* [Raspberry Pi 7in Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)
+* [Raspberry Pi 7-inch Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)
 * [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
