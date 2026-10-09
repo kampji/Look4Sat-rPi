@@ -1,6 +1,6 @@
 # Look4Sat rPi
 
-A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. It is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop. Features the same dark look and four core screens, **Satellites, Passes, Map, Settings**, plus a just-for-fun add-on, **ISS Live**.
+A touch-friendly satellite tracker and pass predictor for Raspberry Pi OS. This is an independent port of the Android app [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop. Features the same dark look and four core screens, **Satellites, Passes, Map, Settings**, plus a just-for-fun add-on, **ISS Live**.
 
 It's designed for an 800×480 touchscreen in landscape, although the layout adapts to portrait and any other resolution.
 
@@ -31,7 +31,7 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
   </tr>
   <tr>
     <td><img src="docs/screen-settings.png" alt="Settings screen: station position, data updates and display options"></td>
-    <td><img src="docs/screen-portrait-passes.png" alt="Passes screen in portrait orientation" width="60%"></td>
+    <td align="center"><img src="docs/screen-portrait-passes.png" alt="Passes screen in portrait orientation" width="60%"></td>
   </tr>
   <tr>
     <td align="center"><b>Settings</b>: station, data, display, radio and rotator</td>
