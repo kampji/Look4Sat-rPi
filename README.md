@@ -192,13 +192,13 @@ Pass search uses an adaptive coarse scan, bisection to 1 s for AOS and LOS, and 
 
 ## Credits
 
-* [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop (GPL-3.0), the inspiration for the design and features. No code was copied.
-* [satellite.js](https://github.com/shashwatak/satellite-js) (MIT): SGP4/SDP4.
-* [Natural Earth](https://www.naturalearthdata.com/): public-domain map, country and sea data.
-* [QR Code generator](https://www.nayuki.io/page/qr-code-generator-library) by Project Nayuki (MIT).
-* [Roboto](https://fonts.google.com/specimen/Roboto) (OFL).
-* Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org).
+* [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop (GPL-3.0), the inspiration for the design and features
+* [satellite.js](https://github.com/shashwatak/satellite-js) (MIT): SGP4/SDP4
+* [Natural Earth](https://www.naturalearthdata.com/): public-domain map, country and sea data
+* [QR Code generator](https://www.nayuki.io/page/qr-code-generator-library) by Project Nayuki (MIT)
+* [Roboto](https://fonts.google.com/specimen/Roboto) (OFL)
+* Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org)
 * [Raspberry Pi 7-inch Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)
 * [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
 * [Raspberry Pi OS (64-bit)](https://www.raspberrypi.com/software/operating-systems/)
-* 3D Printed [Universal Tablet Stand](https://www.thingiverse.com/thing:1706937) by Slajmich on Thingiverse (CC BY 4.0)
+* 3D printed [Universal Tablet Stand](https://www.thingiverse.com/thing:1706937) by Slajmich on Thingiverse (CC BY 4.0)
