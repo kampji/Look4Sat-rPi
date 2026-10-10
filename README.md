@@ -98,7 +98,7 @@ On first start the app downloads satellite data, which takes about a minute. Aft
 
 ## Screens
 
-The bottom/side navigation follows the current Look4Sat layout: **Satellites · Passes · ISS live · Map · Settings**. The Radar opens from a pass.
+The bottom/side navigation follows the current Look4Sat layout: **Satellites · Passes · ISS Live · Map · Settings**. The Radar opens from a pass.
 
 | Screen | What it does |
 |---|---|
@@ -113,9 +113,9 @@ The bottom/side navigation follows the current Look4Sat layout: **Satellites · 
 | | • **Elevation color coding**: red below 15°, yellow in between, green from 45°. You can change both thresholds. |
 | | • **Pull down** (finger or mouse) to recalculate. |
 | **Radar** (tap a pass) | Shows a polar plot of the pass, the live position and an optional sweep, plus az/el/altitude/distance with color-coded elevation. Transmitters show **doppler-corrected** frequencies. The target button streams the pass to a rotator and radio. |
-| **ISS Live** | Plays the ISS live video feed (NASA's official stream, Sen's 4K stream, NASA's current live video, or your own link). Below it: where the ISS is right now, its speed, whether it is in **daylight or Earth's shadow** (and for how long, since the feed looks dark at night), and the next time it passes over you. The video runs only while this page is open. |
+| **ISS Live** | Plays the ISS live video feed (NASA's official stream, Sen's 4K stream, NASA's current live video, or your own link). Below it: what the ISS is flying over right now (country and, for larger countries, state/province, or the sea/ocean) and where it will cross next; its position and speed; whether it is in **daylight or Earth's shadow** (and for how long, since the feed looks dark at night), and the next time it passes over you. The video runs only while this page is open. |
 | **Map** | Shows all selected satellites, plus the ground track (red) and footprint (yellow) of the focused one, with day/night shading and your station. Tap a satellite to focus it, and use ‹ › to cycle. The tools are listed below. |
-| **Settings** | Covers station position (lat/lon/alt, QTH locator, GPS), data sources and updates, file import, passes and elevation colors, display (24/12-hour clock, UTC, night mode, scale, layout, rotation), map layers, rotator, radio and gpsd, plus system controls (full screen, reload, quit). |
+| **Settings** | Covers station position (lat/lon/alt, QTH locator, GPS), data sources and updates, file import, passes and elevation colors, display (24/12-hour clock, UTC, night mode, scale, layout, rotation), map layers, rotator, radio and gpsd, plus system controls (full screen, reload, quit) and **Associated projects**, which credits Arty Bishop's original Look4Sat with links (and QR codes to scan with a phone) to its GitHub repo and Google Play page. |
 
 **Map tools** (top to bottom):
 
@@ -179,6 +179,7 @@ While tracking, the app sends `P az el` to rotctld and `F hz` (doppler-corrected
 server.py            backend (stdlib only)
 web/                 UI: index.html, css/app.css, js/*.js, vendor/satellite.esm.js
 web/assets/world.json  Natural Earth 1:50m land, lakes and borders (simplified)
+web/assets/regions.json  Natural Earth 1:50m countries, states/provinces and seas, for the ISS Live "Over" readout
 data/                created at runtime: state.json, catalog.json, radios.json, custom/
 scripts/             look4sat.sh (start/stop launcher), install, uninstall, run-dev
 tests/fake_net.py    runs the server against synthetic offline data
@@ -193,7 +194,8 @@ Pass search uses an adaptive coarse scan, bisection to 1 s for AOS and LOS, and 
 
 * [Look4Sat](https://github.com/rt-bishop/Look4Sat) by Arty Bishop (GPL-3.0), the inspiration for the design and features. No code was copied.
 * [satellite.js](https://github.com/shashwatak/satellite-js) (MIT): SGP4/SDP4.
-* [Natural Earth](https://www.naturalearthdata.com/): public-domain map data.
+* [Natural Earth](https://www.naturalearthdata.com/): public-domain map, country and sea data.
+* [QR Code generator](https://www.nayuki.io/page/qr-code-generator-library) by Project Nayuki (MIT).
 * [Roboto](https://fonts.google.com/specimen/Roboto) (OFL).
 * Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org).
 * [Raspberry Pi 7-inch Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)

@@ -1,6 +1,7 @@
 import { S, on, emit, save, flush, api, reloadData, requestPasses } from '../store.js';
 import { h, icon, onTap, toast, dialog, confirmDialog, toggle, stepper, segmented, input, fmtAgo, osk } from '../ui.js';
 import { toQth, fromQth } from '../orbit.js';
+import qrcodegen from '../../vendor/qrcodegen.esm.js';
 
 let root, scroll, updatePoll = null;
 const U = {};      // live elements of the data section (rebuilt on show)
@@ -213,12 +214,54 @@ function systemSection() {
       }))),
     h('div', { class: 'about' },
       h('div', {}, h('b', {}, 'Look4Sat rPi '), S.meta.version ? 'v' + S.meta.version : ''),
-      h('div', { class: 'hint' }, 'An independent Raspberry Pi take on the Look4Sat Android app by Arty Bishop. SGP4 by satellite.js · map data Natural Earth · elements from CelesTrak, AMSAT and SatNOGS.')));
+      h('div', { class: 'hint' }, 'An independent Raspberry Pi satellite tracker inspired by the Look4Sat Android app by Arty Bishop. See Associated projects below.')));
+}
+
+// ----------------------------------------------------------------- associated projects
+const LINKS = {
+  l4sGithub: { label: 'Look4Sat on GitHub', url: 'https://github.com/rt-bishop/Look4Sat' },
+  l4sPlay: { label: 'Look4Sat on Google Play', url: 'https://play.google.com/store/apps/details?id=com.rtbishop.look4sat' },
+};
+
+/** QR code as an SVG element (scan it with a phone — handy on a kiosk with no browser chrome). */
+function qrSvg(text, px = 168) {
+  const qr = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.MEDIUM);
+  const n = qr.size, b = 2, d = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (qr.getModule(x, y)) d.push(`M${x + b},${y + b}h1v1h-1z`);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${n + 2 * b} ${n + 2 * b}`);
+  svg.setAttribute('width', px); svg.setAttribute('height', px);
+  svg.setAttribute('class', 'qr');
+  svg.innerHTML = `<rect width="100%" height="100%" fill="#fff"/><path d="${d.join('')}" fill="#000"/>`;
+  return svg;
+}
+
+function linkDialog({ label, url }) {
+  dialog({
+    title: label,
+    body: h('div', { class: 'link-dialog' }, qrSvg(url, 200),
+      h('div', {}, h('div', { class: 'link-url' }, url), h('p', { class: 'hint' }, 'Scan the code with your phone to open the page there.'))),
+    actions: [{ label: 'Open in a new window', onClick: () => { window.open(url, '_blank', 'noopener'); } }, { label: 'Close', primary: true }],
+  });
+}
+
+const linkBtn = (key, ic) => { const b = h('button', { class: 'btn link-btn' }, icon(ic, 'sm'), LINKS[key].label); onTap(b, () => linkDialog(LINKS[key])); return b; };
+
+function projectsSection() {
+  return h('div', { class: 'card settings-sec projects' },
+    h('div', { class: 'sec-title' }, icon('heart'), 'Associated projects'),
+    h('div', { class: 'project' },
+      h('div', { class: 'project-text' },
+        h('div', { class: 'project-name' }, 'Look4Sat ', h('span', { class: 'muted' }, 'by Arty Bishop (rt-bishop)')),
+        h('p', {}, 'Arty Bishop is the original creator of Look4Sat, the open-source satellite tracker and pass predictor for Android that inspired this app. Its design and features are the model for Look4Sat rPi. If you have an Android phone, get the original!'),
+        h('p', { class: 'hint' }, 'Look4Sat rPi is a separate, independent codebase. It is not affiliated with or endorsed by the Look4Sat project.'),
+        h('div', { class: 'btn-row left' }, linkBtn('l4sGithub', 'link'), linkBtn('l4sPlay', 'link'))),
+      h('div', { class: 'project-qr' }, qrSvg(LINKS.l4sGithub.url, 120), h('div', { class: 'hint' }, 'Look4Sat on GitHub'))));
 }
 
 function build() {
   scroll.innerHTML = '';
-  scroll.append(h('div', { class: 'settings-cols' }, stationSection(), dataSection(), passesSection(), displaySection(), hamSection(), systemSection()));
+  scroll.append(h('div', { class: 'settings-cols' }, stationSection(), dataSection(), passesSection(), displaySection(), hamSection(), systemSection(), projectsSection()));
 }
 
 async function pollGps() {

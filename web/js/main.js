@@ -7,7 +7,7 @@ import mapView from './views/map.js';
 import issView from './views/iss.js';
 import settingsView from './views/settings.js';
 
-// Radar is a sub-page of Passes (as in current Look4Sat); its nav slot is the ISS live page.
+// Radar is a sub-page of Passes (as in current Look4Sat); its nav slot is the ISS Live page.
 const VIEWS = [satellitesView, passesView, issView, mapView, settingsView, radarView];
 const app = document.getElementById('app');
 let current = null;

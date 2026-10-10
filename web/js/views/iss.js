@@ -1,10 +1,11 @@
-// ISS live — the station's live video feed next to where it is right now.
+// ISS Live — the station's live video feed next to where it is right now (and what it is flying over).
 // The video is loaded only while this page is visible (saves CPU / bandwidth on the Pi).
 import { S, on, save } from '../store.js';
 import { h, icon, iconBtn, onTap, dialog, input, toast, fmtTime, fmtDeg, fmtKm, elClass } from '../ui.js';
 import { timerBox } from './common.js';
 import { makeSatrec, look, toQth } from '../orbit.js';
 import { nextPassOf, sunlit } from '../predict.js';
+import { loadRegions, lookup } from '../regions.js';
 
 const ISS = 25544;
 const NASA_CHANNEL = 'UCLA_DiR1FfKNvjuUpBHmylQ';
@@ -15,7 +16,8 @@ export const PRESETS = [
   { name: "NASA channel — whatever's live now", url: `https://www.youtube.com/channel/${NASA_CHANNEL}/live` },
 ];
 
-let root, timer, frameWrap, srcBtnLabel, info = {}, note;
+let root, timer, frameWrap, srcBtnLabel, info = {}, note, overEl;
+let track = { t: 0, segs: [] }; // what the ground track crosses, from 30 min ago to 30 min ahead
 let visible = false, rec = null, recId = null, next = null, nextAt = 0, lightCache = { t: 0 };
 
 const sources = () => [...PRESETS, ...((S.state.iss && S.state.iss.custom) || [])];
@@ -105,6 +107,39 @@ function light(now) {
   return lightCache;
 }
 
+/**
+ * Sample the ground track from 30 min back to 30 min ahead and group it into segments of
+ * "same place below". Cheap (240 lookups), refreshed every 30 s.
+ */
+function overflight(now) {
+  if (now - track.t < 30000 && track.rec === rec) return track;
+  const segs = [];
+  const step = 15000;
+  for (let t = now - 30 * 60000; t <= now + 30 * 60000; t += step) {
+    const s = look(rec, null, t);
+    const r = s && lookup(s.lat, s.lon);
+    if (!r) continue;
+    const last = segs[segs.length - 1];
+    if (last && last.label === r.label) last.end = t;
+    else segs.push({ label: r.label, kind: r.kind, start: t, end: t });
+  }
+  track = { t: now, rec, segs };
+  return track;
+}
+
+function showOverflight(now) {
+  const s = look(rec, null, now);
+  const here = s && lookup(s.lat, s.lon);
+  if (!here) { overEl.textContent = ''; return; }
+  const { segs } = overflight(now);
+  const i = segs.findIndex((g) => g.label === here.label && g.start <= now + 15000 && g.end >= now - 15000);
+  // next place, skipping blips shorter than one sample (tiny islands, coastline wiggles)
+  const after = segs.slice(i >= 0 ? i + 1 : 0).find((g) => g.start > now && g.end - g.start >= 15000 && g.label !== here.label);
+  overEl.innerHTML = '';
+  overEl.append(icon('globe', 'sm'), h('span', {}, 'Over '), h('span', { class: 'over-name ' + here.kind }, here.label));
+  if (after) overEl.append(h('span', {}, ` · next ${after.label} in ${Math.max(1, Math.round((after.start - now) / 60000))} min`));
+}
+
 function update(now) {
   const e = ensureRec();
   if (!e || !rec) {
@@ -131,12 +166,13 @@ function update(now) {
   note.textContent = L.lit
     ? (mins ? `ISS in daylight · sunset on board in ${mins} min` : 'ISS in daylight')
     : (mins ? `ISS in Earth's shadow — the video looks dark for ~${mins} min` : "ISS in Earth's shadow — the video looks dark");
+  showOverflight(now);
   if (next) info['Next pass'].className = 'iv ' + elClass(next.maxEl);
   info['Next pass'].textContent = next ? `${fmtTime(next.aos)} · ${Math.round(next.maxEl)}°` : '--';
 }
 
 export default {
-  id: 'iss', label: 'ISS live', icon: 'iss',
+  id: 'iss', label: 'ISS Live', icon: 'iss',
   mount(el) {
     root = el;
     timer = timerBox();
@@ -150,14 +186,17 @@ export default {
         frameWrap = h('div', { class: 'card iss-video' }),
         h('div', { class: 'card iss-info' },
           h('div', { class: 'iss-cells' }, ['Latitude', 'Longitude', 'Altitude', 'Speed', 'QTH', 'Light', 'Next pass'].map(cell)),
-          note = h('div', { class: 'iss-note' }))),
+          h('div', { class: 'iss-foot' }, note = h('span', { class: 'iss-note' }), overEl = h('span', { class: 'iss-over' })))),
     );
     srcBtnLabel.textContent = current().name;
     on('catalog', () => { recId = null; next = null; });
     on('settings', (p) => { if (p?.station || p?.passes) next = null; });
     on('filter', () => { next = null; });
   },
-  show() { visible = true; loadVideo(); update(Date.now()); },
+  show() {
+    visible = true; loadVideo(); update(Date.now());
+    loadRegions().then(() => { track.t = 0; if (visible) update(Date.now()); }).catch(() => { overEl.textContent = ''; });
+  },
   hide() { visible = false; unloadVideo(); },
   tick(now) { if (visible) update(now); },
 };
