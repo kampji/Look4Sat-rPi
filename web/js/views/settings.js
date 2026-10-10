@@ -213,8 +213,7 @@ function systemSection() {
         await api('state/reset', { method: 'POST' }); location.reload();
       }))),
     h('div', { class: 'about' },
-      h('div', {}, h('b', {}, 'Look4Sat rPi '), S.meta.version ? 'v' + S.meta.version : ''),
-      h('div', { class: 'hint' }, 'An independent Raspberry Pi satellite tracker inspired by the Look4Sat Android app by Arty Bishop. See Associated projects below.')));
+      h('div', {}, h('b', {}, 'Look4Sat rPi '), S.meta.version ? 'v' + S.meta.version : '')));
 }
 
 // ----------------------------------------------------------------- associated projects
@@ -256,12 +255,19 @@ function projectsSection() {
         h('p', {}, 'Arty Bishop is the original creator of Look4Sat, the open-source satellite tracker and pass predictor for Android that inspired this app. Its design and features are the model for Look4Sat rPi. If you have an Android phone, get the original!'),
         h('p', { class: 'hint' }, 'Look4Sat rPi is a separate, independent codebase. It is not affiliated with or endorsed by the Look4Sat project.'),
         h('div', { class: 'btn-row left' }, linkBtn('l4sGithub', 'link'), linkBtn('l4sPlay', 'link'))),
-      h('div', { class: 'project-qr' }, qrSvg(LINKS.l4sGithub.url, 120), h('div', { class: 'hint' }, 'Look4Sat on GitHub'))));
+      h('div', { class: 'project-qr' }, qrSvg(LINKS.l4sPlay.url, 120), h('div', { class: 'hint' }, 'Look4Sat on Google Play'))));
 }
 
 function build() {
   scroll.innerHTML = '';
-  scroll.append(h('div', { class: 'settings-cols' }, stationSection(), dataSection(), passesSection(), displaySection(), hamSection(), systemSection(), projectsSection()));
+  // two explicit columns in landscape (System sits under Passes); one column in portrait
+  const sys = systemSection();
+  sys.classList.add('sec-system');
+  scroll.append(
+    h('div', { class: 'settings-cols' },
+      h('div', { class: 'scol' }, stationSection(), dataSection(), passesSection(), sys),
+      h('div', { class: 'scol' }, displaySection(), hamSection())),
+    projectsSection());
 }
 
 async function pollGps() {
