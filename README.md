@@ -31,7 +31,7 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
   </tr>
   <tr>
     <td><img src="docs/screen-settings.png" alt="Settings screen: station position, data updates and display options"></td>
-    <td align="center"><img src="docs/screen-iss-live.png" alt="ISS Live screen showing live feed from ISS" width="60%"></td>
+    <td align="center"><img src="docs/screen-iss-live.png" alt="ISS Live screen showing live feed from ISS"></td>
   </tr>
   <tr>
     <td align="center"><b>Settings</b>: station, data, display, radio and rotator</td>
@@ -39,7 +39,7 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
   </tr>
 </table>
 
-<sub>Screenshots at 800×480 with test data.</sub>
+<sub>Screenshots at 800×480.</sub>
 
 ## How it works
 
@@ -196,7 +196,7 @@ Pass search uses an adaptive coarse scan, bisection to 1 s for AOS and LOS, and 
 * [Natural Earth](https://www.naturalearthdata.com/): public-domain map data.
 * [Roboto](https://fonts.google.com/specimen/Roboto) (OFL).
 * Orbital data from [CelesTrak](https://celestrak.org), [AMSAT](https://www.amsat.org) and [SatNOGS](https://satnogs.org).
-
-## Tested Hardware
 * [Raspberry Pi 7-inch Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/)
 * [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
+* [Raspberry Pi OS (64-bit)](https://www.raspberrypi.com/software/operating-systems/)
+* 3D Printed [Universal Tablet Stand](https://www.thingiverse.com/thing:1706937) by Slajmich on Thingiverse (CC BY 4.0)
