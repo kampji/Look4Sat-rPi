@@ -31,7 +31,7 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 APP_NAME = "Look4Sat rPi"
-VERSION = "1.0.0"
+VERSION = "2.1.0"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(ROOT, "web")
 POLITE_DELAY = 0.4  # seconds between CelesTrak group requests
