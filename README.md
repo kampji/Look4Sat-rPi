@@ -31,11 +31,11 @@ It's designed for an 800×480 touchscreen in landscape, although the layout adap
   </tr>
   <tr>
     <td><img src="docs/screen-settings.png" alt="Settings screen: station position, data updates and display options"></td>
-    <td align="center"><img src="docs/screen-portrait-passes.png" alt="Passes screen in portrait orientation" width="60%"></td>
+    <td align="center"><img src="docs/screen-iss-live.png" alt="ISS Live screen showing live feed from ISS" width="60%"></td>
   </tr>
   <tr>
     <td align="center"><b>Settings</b>: station, data, display, radio and rotator</td>
-    <td align="center"><b>Portrait</b>: the same app on a 480×800 screen</td>
+    <td align="center"><b>ISS Live</b>: live feed from the ISS framed by tracking information</td>
   </tr>
 </table>
 
